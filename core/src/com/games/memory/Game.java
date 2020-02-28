@@ -6,8 +6,8 @@ import java.util.List;
 
 class Game  {
 
-    private final int DECKS_COUNT = 2;
-    private final int CARDS_COUNT = 3;
+    private final int DECKS_COUNT = 4;
+    private final int CARDS_COUNT = 4;
     private boolean equality;
     private Card card1, card2;
     private MyInputProcessor inputProcessor;
@@ -44,9 +44,6 @@ class Game  {
     }
 
     void startGame(Card card) {
-        if(countOfPairs == CARDS_COUNT) {
-            System.out.println("WIN");
-        }
         if (card1 == null) {
             card1 = openIfClicked(card);
         } else if(card2 == null) {
@@ -65,14 +62,13 @@ class Game  {
     private Card openIfClicked(Card card) {
         if (inputProcessor.leftClick()) {
             int mouseY = MemoryGame.HEIGHT - inputProcessor.getY();
-            if ( (inputProcessor.getX() > card.getX() && inputProcessor.getX() < card.getX() + card.WIDTH) &&
+            if (!card.isVisibility() && (inputProcessor.getX() > card.getX() && inputProcessor.getX() < card.getX() + card.WIDTH) &&
                     (mouseY > card.getY() && mouseY < card.getY() + card.HEIGHT)) {
+
                 if(card1 != null && card2 != null) {
                     if (!equality) {
                         closeCard(card1);
                         closeCard(card2);
-                    } else {
-                        countOfPairs++;
                     }
 
                     card1 = card;
