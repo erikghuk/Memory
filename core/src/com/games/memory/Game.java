@@ -7,24 +7,25 @@ import java.util.LinkedList;
 import java.util.List;
 
 class Game  {
+    private final int DECKS_COUNT = 4;
+    private final int CARDS_COUNT = 11;
+
     private final String WIN_IMAGE_URL = "images/PNG/finish.png";
-    private final int DECKS_COUNT = 2;
-    private final int CARDS_COUNT = 8;
-    private boolean equality;
-    private Card card1, card2;
+    private final String PLAGAIN_IMAGE_URL = "images/PNG/playAgain.jpg";
+    private Sprite gameFinishSprite, playAgainSprite;
+    private SpriteController spriteController;
+    private Card firstOpenedCard, secondOpenCard;
     private MyInputProcessor inputProcessor;
+    private Deck deck, anotherDeck;
     private List<Deck> deckList;
+    private List<Card> globalList;
     private int countOfPairs;
     private int countOfFalses;
     private int score;
-    private Sprite gameFinishSprite;
-    private SpriteController spriteController;
-
-    private List<Card> globalList;
-    private Deck deck, anotherDeck;
+    private boolean equality;
     private boolean gameIsFinished;
 
-    Game(){
+    Game() {
         inputProcessor = new MyInputProcessor();
         deckList = new LinkedList<>();
 
@@ -32,13 +33,11 @@ class Game  {
         globalList = new LinkedList<>();
         for (Card c : deck.getCardsList()) {
             c.setVisibility(false);
-            c.setImageToCard();
         }
         for (int i = 0; i < DECKS_COUNT; i++) {
             deckList.add(deck);
             try {
                 anotherDeck = (Deck) deck.clone();
-                anotherDeck.shuffle();
                 globalList.addAll(anotherDeck.getCardsList());
                 deck = anotherDeck;
             } catch (CloneNotSupportedException e) {
@@ -48,25 +47,35 @@ class Game  {
         Collections.shuffle(globalList);
     }
 
-    void startGame(Card card) {
+    void startGame(Card entireCard) {
+        // is game finished
         if(countOfPairs == CARDS_COUNT * DECKS_COUNT/2) {
-            spriteController = new SpriteController();
-            gameFinishSprite = spriteController.initSprite(WIN_IMAGE_URL);
-            gameIsFinished = true;
-            score = ((DECKS_COUNT * CARDS_COUNT)*(DECKS_COUNT * CARDS_COUNT)/countOfFalses * 2);
-            System.out.println("You Win. You have a : " + score + " points");
+            finish();
             return;
         }
-        if (card1 == null) {
-            card1 = openIfClicked(card);
-        } else if(card2 == null) {
-            if(card == card1) return;
-            card2 = openIfClicked(card);
-            compare(card1, card2);
-
+        if (firstOpenedCard == null) {
+            firstOpenedCard = openIfClicked(entireCard);
+        } else if(secondOpenCard == null) {
+            if(entireCard == firstOpenedCard) return;
+            secondOpenCard = openIfClicked(entireCard);
+            compare(firstOpenedCard, secondOpenCard);
         } else {
-            openIfClicked(card);
+            openIfClicked(entireCard);
         }
+    }
+
+    private void finish() {
+        spriteController = new SpriteController();
+        gameFinishSprite = spriteController.initSprite(WIN_IMAGE_URL);
+        playAgainSprite = spriteController.initSprite(PLAGAIN_IMAGE_URL);
+        playAgainSprite.setX(450);
+        playAgainSprite.setY(250);
+        gameIsFinished = true;
+
+        if(countOfFalses == 0)
+            countOfFalses = 1;
+        score = ((DECKS_COUNT * CARDS_COUNT)*(DECKS_COUNT * CARDS_COUNT)/countOfFalses * 2);
+
     }
 
     private void compare(Card c1, Card c2) {
@@ -74,48 +83,27 @@ class Game  {
     }
 
     private Card openIfClicked(Card card) {
-        if (inputProcessor.leftClick()) {
-
+        // if there is click event
+        if (inputProcessor.click()) {
             int mouseY = MemoryGame.HEIGHT - inputProcessor.getY();
-            if (!card.isVisibility() && (inputProcessor.getX() > card.getX() && inputProcessor.getX() < card.getX() + card.WIDTH) &&
-                    (mouseY > card.getY() && mouseY < card.getY() + card.HEIGHT)) {
-                if(card1 != null && card2 != null) {
+            // if entire card is clicked and not opened
+            if (inputProcessor.cardClicked(card)) {
+                if(firstOpenedCard != null && secondOpenCard != null) {
                     if (!equality) {
-                        closeCard(card1);
-                        closeCard(card2);
+                        firstOpenedCard.setVisibility(false);
+                        secondOpenCard.setVisibility(false);
                     }
-
-                    card1 = card;
-                    card2 = null;
-                } else if(card1 != null && card2 == null) {
-                    if(card1.equals(card)) {
-                        countOfPairs++;
-                        System.out.println("countOfPairs - " + countOfPairs);
-                    } else {
-                        countOfFalses++;
-                        System.out.println("countOfFalses - " + countOfFalses);
-                    }
+                    firstOpenedCard = card;
+                    secondOpenCard = null;
+                } else if(firstOpenedCard != null) {
+                    if(firstOpenedCard.equals(card)) countOfPairs++;
+                    else countOfFalses++;
                 }
-
-                openCard(card);
+                card.setVisibility(true);
                 return card;
             }
         }
         return null;
-    }
-
-    private void openCard(Card card) {
-        card.setVisibility(true);
-        card.setImageToCard();
-    }
-
-    private void closeCard(Card card) {
-        card.setVisibility(false);
-        card.setImageToCard();
-    }
-
-    List<Deck> getDeckList() {
-        return deckList;
     }
 
     public boolean isGameIsFinished() {
@@ -130,11 +118,15 @@ class Game  {
         return gameFinishSprite;
     }
 
-    public void setGameFinishSprite(Sprite gameFinishSprite) {
-        this.gameFinishSprite = gameFinishSprite;
+    public Sprite getPlayAgainSprite() {
+        return playAgainSprite;
     }
 
     public int getScore() {
         return score;
+    }
+
+    public MyInputProcessor getInputProcessor() {
+        return inputProcessor;
     }
 }

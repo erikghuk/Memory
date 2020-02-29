@@ -36,9 +36,14 @@ public class GameMainScreen implements Screen {
                 c.setX(x1);
                 c.setY(y1);
                 newGame.startGame(c);
+
                 if(newGame.isGameIsFinished()) {
                     batch.draw(newGame.getGameFinishSprite(), 250, 350);
                     font.draw(batch, "Your score is " + newGame.getScore(), 20, 600);
+                    batch.draw(newGame.getPlayAgainSprite(), newGame.getPlayAgainSprite().getX(), newGame.getPlayAgainSprite().getY());
+                    if(newGame.getInputProcessor().click() && newGame.getInputProcessor().spriteClicked(newGame.getPlayAgainSprite())) {
+                        newGame = new Game();
+                    }
                 }
                 batch.draw(c.getCardSprite(), x1, y1);
                 x1 += 90;

@@ -1,8 +1,6 @@
 package com.games.memory;
 
-
 import java.util.*;
-
 
 public class Deck implements Cloneable {
     private final int MAX_SIZE = 52;
@@ -13,7 +11,6 @@ public class Deck implements Cloneable {
     Deck(int count) {
         this.count = count >= 0 && count <= MAX_SIZE ? count : 0;
         cards = new HashSet<>();
-
         while (true) {
             cards.add(new Card());
             if(cards.size() == count) {
@@ -33,7 +30,6 @@ public class Deck implements Cloneable {
         }
         cardsList = new LinkedList<>(cards);
     }
-
 
     void shuffle() {
         Collections.shuffle(cardsList);

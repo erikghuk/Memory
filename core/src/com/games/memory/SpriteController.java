@@ -8,14 +8,11 @@ public class SpriteController {
     private  Sprite sprite;
 
 
-
     public  Sprite initSprite(String texturePath) {
         texture = new Texture(texturePath);
         sprite = new Sprite(texture);
         return sprite;
     }
-
-
 
     public  void disposeSprite() {
         texture.dispose();
